@@ -1,12 +1,10 @@
-// backend/controllers/authController.js
-
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 // Register a new user
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role, userType } = req.body;
 
   try {
     // Check if user already exists
@@ -21,6 +19,8 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
+      role,
+      userType,
     });
 
     // Encrypt password
@@ -60,6 +60,8 @@ export const loginUser = async (req, res) => {
     const payload = {
       user: {
         id: user.id,
+        role: user.role,
+        userType: user.userType,
       },
     };
 

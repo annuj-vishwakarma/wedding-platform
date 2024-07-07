@@ -1,5 +1,3 @@
-// backend/models/User.js
-
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -10,10 +8,20 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,  // Index will be created for this field
+    unique: true,
   },
   password: {
     type: String,
+    required: true,
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user',
+  },
+  userType: {
+    type: String,
+    enum: ['caterer', 'photographer', 'mehndi artist', 'wedding planner'],
     required: true,
   },
   createdAt: {
@@ -21,9 +29,6 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// Ensure indexes are created
-userSchema.index({ email: 1 });
 
 const User = mongoose.model('User', userSchema);
 
