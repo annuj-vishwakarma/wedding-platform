@@ -1,31 +1,39 @@
+// backend/middleware/authMiddleware.js
+
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-export const authenticateUser = (req, res, next) => {
-  const token = req.header('Authorization').replace('Bearer ', '');
-
+const authenticateUser = async (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
+    return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.user;
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    req.user = user;
     next();
-  } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 
-export const authorizeAdmin = (req, res, next) => {
+const authorizeAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ msg: 'Access denied: Admins only' });
+    return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };
 
-export const authorizeRole = (role) => (req, res, next) => {
-  if (req.user.role !== role) {
-    return res.status(403).json({ msg: `Access denied: ${role} only` });
+const authorizeRole = (roles) => (req, res, next) => {
+  if (!roles.includes(req.user.role)) {
+    return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };
+
+export { authenticateUser, authorizeAdmin, authorizeRole };
